@@ -1,5 +1,7 @@
-import React from 'react';
+
 import { Github, Linkedin, Twitter } from 'lucide-react';
+import ajay from "./images/ajay.jpg";
+import morya from "./images/morya.jpg";
 
 interface TeamMember {
   name: string;
@@ -7,7 +9,7 @@ interface TeamMember {
   image: string;
   bio: string;
   social: {
-    github?: string;
+    github?: string; 
     linkedin?: string;
     twitter?: string;
   };
@@ -15,18 +17,17 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   {
-    name: "Sarah Chen",
+    name: "L Moryakantha",
     role: "Lead Developer",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop",
+    image: morya,
     bio: "Full-stack developer with expertise in AI and machine learning, passionate about creating innovative solutions for health tech.",
     social: {
-      github: "#",
-      linkedin: "#",
-      twitter: "#"
+      github: "https://github.com/MK-DEV369",
+      linkedin: "https://www.linkedin.com/in/l-moryakantha-0b7222341/",
     }
   },
   {
-    name: "Michael Rodriguez",
+    name: "Nikhil",
     role: "UI/UX Designer",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
     bio: "Creative designer focused on crafting intuitive and beautiful user experiences in healthcare applications.",
@@ -36,7 +37,7 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Aisha Patel",
+    name: "Nihal",
     role: "Nutrition Specialist",
     image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop",
     bio: "Registered dietitian with a passion for making nutrition information accessible and easy to understand.",
@@ -46,7 +47,7 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "David Kim",
+    name: "Srikanth",
     role: "Backend Engineer",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop",
     bio: "Systems architect specializing in scalable infrastructure and machine learning implementations.",
@@ -56,13 +57,14 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Emma Thompson",
+    name: "Ajay Reddy",
     role: "Product Manager",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop",
+    image: ajay,
     bio: "Strategic leader with a background in healthcare technology and product development.",
     social: {
-      linkedin: "#",
-      twitter: "#"
+      linkedin: "https://www.linkedin.com/in/ajay-reddy-4ab9282a4?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+      twitter: "#",
+      github: "https://github.com/ajayrm04",
     }
   }
 ];
