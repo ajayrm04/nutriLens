@@ -41,12 +41,7 @@ export function AnalyzePage() {
           <div className="flex items-center gap-4">
             <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
               Dashboard
-            </button>
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-emerald-600"
-            />
+            </button>  
           </div>
         </header>
 

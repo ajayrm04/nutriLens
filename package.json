@@ -12,7 +12,12 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.20.2",
     "@clerk/nextjs": "^6.9.2",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "lucide-react": "^0.344.0",
+    "mongoose": "^8.9.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -31,5 +36,10 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2"
-  }
+  },
+  "description": "",
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
