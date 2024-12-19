@@ -9,12 +9,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Define the UserProfile schema
 const userProfileSchema = new mongoose.Schema({
   clerkId: {
     type: String,
@@ -43,26 +41,25 @@ const userProfileSchema = new mongoose.Schema({
   },
 });
 
-// Create the model
 const UserProfile = mongoose.model('UserProfile', userProfileSchema);
 
-// Endpoint to save user data
 app.post('/api/save-user-data', async (req, res) => {
   try {
     const { clerkId, age, gender, specialNeeds, weight, height } = req.body;
 
-    // Validate required fields
     if (!clerkId || !age || !gender || !weight || !height) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Check if the profile already exists
-    const existingProfile = await UserProfile.findOne({ clerkId });
-    if (existingProfile) {
-      return res.status(200).json({ message: 'Profile already exists' });
+    if (typeof age !== 'number' || typeof weight !== 'number' || typeof height !== 'number') {
+      return res.status(400).json({ error: 'Age, Weight, and Height must be numbers' });
     }
 
-    // Create a new profile
+    const existingProfile = await UserProfile.findOne({ clerkId });
+    if (existingProfile) {
+      return res.status(409).json({ message: 'Profile already exists' }); // Changed to 409 Conflict
+    }
+
     const newProfile = new UserProfile({
       clerkId,
       age,
@@ -73,10 +70,21 @@ app.post('/api/save-user-data', async (req, res) => {
     });
 
     await newProfile.save();
-    res.status(201).json({ message: 'Profile saved successfully' });
+    res.status(201).json({ message: 'Profile saved successfully', userId: clerkId });
   } catch (error) {
     console.error('Error saving profile:', error);
-    res.status(500).json({ error: 'Failed to save profile' });
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/api/check-user-data/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const existingProfile = await UserProfile.findOne({ clerkId: userId });
+    res.status(200).json({ exists: !!existingProfile });
+  } catch (error) {
+    console.error('Error checking user data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

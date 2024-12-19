@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import {useUser } from '@clerk/clerk-react';
+import axios, { AxiosError } from 'axios';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './components/HomePage';
 import { AnalyzePage } from './components/AnalyzePage';
@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      axios.get(`/api/check-user-data/${user.id}`)
+      axios.get(`http://localhost:5000/api/save-user-data/${user.id}`)
         .then(response => {
           if (!response.data.exists) {
             setShowModal(true);
@@ -24,22 +24,31 @@ function App() {
     }
   }, [user]);
 
-  const handleSaveData = (formData: Record<string, unknown>) => {
+  const handleSaveData = async (formData: Record<string, unknown>) => {
     if (user) {
-      axios.post('/api/save-user-data', {
-      clerkId: user.id,
-      ...formData,
-    })
-    .then(() => {
-      setShowModal(false);
-      alert('Data saved successfully!');
-    })
-    .catch(error => {
-      console.error('Error saving data:', error);
-      alert('Failed to save data.');
-    });
+      try {
+        const response = await axios.post('http://localhost:5000/api/save-user-data', {
+          clerkId: user.id,
+          ...formData,
+        });
+        console.log(response.data);
+        setShowModal(false);
+        alert('Data saved successfully!');
+      } catch(error: unknown) {
+        if (error instanceof AxiosError && error.response) {
+          console.error('Error saving data:', error.response.data);
+          alert(`Failed to save data. Status code: ${error.response.status}`);
+        } else if (error instanceof Error) {
+          console.error('Error saving data:', error.message);
+          alert('Failed to save data. Check your network connection.');
+        } else {
+          console.error('Error saving data:', String(error));
+          alert('Failed to save data. An unknown error occurred.');
+        }
+      }
   } else {
     console.warn("User is not authenticated");
+    alert("User is not authenticated");
   }
   };
 

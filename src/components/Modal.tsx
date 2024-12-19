@@ -1,23 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-type FormData = {
-  age: string;
-  gender: string;
-  specialNeeds: string[];
-  weight: string;
-  height: string;
-};
+interface OnSaveProps {
+  (data: {
+    age: string;
+    gender: string;
+    specialNeeds: string[];
+    weight: string;
+    height: string;
+  }): void;
+}
 
-type ModalProps = {
-  onSave: (data: FormData) => void;
-};
-
-export default function Modal({ onSave }: ModalProps) {
-  const [age, setAge] = useState('');
-  const [gender, setGender] = useState('');
+export default function Modal({ onSave }: { onSave: OnSaveProps }) {
+  const [age, setAge] = useState<string>('');
+  const [gender, setGender] = useState<string>('');
   const [specialNeeds, setSpecialNeeds] = useState<string[]>([]);
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState<string>('');
+  const [height, setHeight] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,33 +24,98 @@ export default function Modal({ onSave }: ModalProps) {
 
   const handleSpecialNeedsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-    setSpecialNeeds((prev) => (checked ? [...prev, value] : prev.filter((need) => need !== value)));
+    setSpecialNeeds((prev: string[]) =>
+      checked ? [...prev, value] : prev.filter((need) => need !== value)
+    );
   };
 
+  const handleGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedGender = e.target.value;
+    setGender(selectedGender);
+
+    if (selectedGender === 'Male') {
+      setSpecialNeeds((prev) => prev.filter((need) => need !== 'Pregnancy'));
+    }
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   return (
-    <div className="modal">
-      <form onSubmit={handleSubmit}>
-        <h2>Enter Your Details</h2>
-        <input type="number" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} required />
-        <select value={gender} onChange={(e) => setGender(e.target.value)} required>
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <fieldset>
-          <legend>Special Needs</legend>
-          {['Diabetes', 'Obesity', 'Low BP', 'High BP', 'Pregnancy'].map((need) => (
-            <label key={need}>
-              <input type="checkbox" value={need} onChange={handleSpecialNeedsChange} />
-              {need}
-            </label>
-          ))}
-        </fieldset>
-        <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} required />
-        <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} required />
-        <button type="submit">Save</button>
-      </form>
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+
+      <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Enter Your Details</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="number"
+            placeholder="Age"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+
+          <select
+            value={gender}
+            onChange={handleGenderChange}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <fieldset className="space-y-2">
+            <legend className="font-semibold">Special Needs</legend>
+            {['Diabetes', 'Obesity', 'High BP', 'Pregnancy'].map((need) => (
+              <label key={need} className="block">
+                <input
+                  type="checkbox"
+                  value={need}
+                  onChange={handleSpecialNeedsChange}
+                  checked={specialNeeds.includes(need)}
+                  disabled={need === 'Pregnancy' && gender === 'Male'}
+                  className="mr-2"
+                />
+                {need}
+              </label>
+            ))}
+          </fieldset>
+
+          <input
+            type="number"
+            placeholder="Weight (kg)"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+
+          <input
+            type="number"
+            placeholder="Height (cm)"
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-emerald-500 text-white p-2 rounded hover:bg-emerald-600"
+          >
+            Save
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
