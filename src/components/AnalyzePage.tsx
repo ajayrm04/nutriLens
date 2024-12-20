@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { Camera, Upload, AlertTriangle } from 'lucide-react';
+import CropModal from '../components/CropModal';
 
 export function AnalyzePage() {
   const [servingSize, setServingSize] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      setShowCropModal(true);
     }
   };
 
@@ -24,29 +28,60 @@ export function AnalyzePage() {
     }
   };
 
-  const handleCameraClick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
-    input.onchange = (e) => handleFileUpload(e as React.ChangeEvent<HTMLInputElement>);
-    input.click();
+  const handleSaveCroppedImage = (croppedImage: any) => {
+    setSelectedFile(croppedImage);
+    setShowCropModal(false);
+    alert('Image cropped and saved successfully!');
   };
+
+  const handleCameraClick = async () => {
+    try {
+      const constraints = {
+        video: { facingMode: 'environment' },
+        audio: false,
+      };  
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();  
+      const captureImage = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], 'captured-image.png', { type: 'image/png' });
+            setSelectedFile(file);
+            setShowCropModal(true);
+          }
+        }, 'image/png');
+        stream.getTracks().forEach(track => track.stop());
+      };
+      const captureButton = document.createElement('button');
+      captureButton.textContent = 'Capture Image';
+      captureButton.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; background-color: #10b981; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;';
+      document.body.appendChild(video);
+      document.body.appendChild(captureButton);
+  
+      captureButton.addEventListener('click', () => {
+        captureImage();
+        document.body.removeChild(video);
+        document.body.removeChild(captureButton);
+      });
+    } catch (error) {
+      console.error('Error accessing the camera:', error);
+      alert('Camera access is not available.');
+    }
+  };
+  
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
       <div className="p-6">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-emerald-800">Food Label Analyzer</h1>
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
-              Dashboard
-            </button>  
-          </div>
-        </header>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Left Card - Upload Section */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Upload Food Label</h2>
             <div 
@@ -77,6 +112,13 @@ export function AnalyzePage() {
                     <Camera className="w-4 h-4" />
                     Use Camera
                   </button>
+                  {showCropModal && selectedFile && (
+                    <CropModal
+                    imageFile={selectedFile}
+                    onClose={() => setShowCropModal(false)}
+                    onSave={handleSaveCroppedImage}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -94,57 +136,54 @@ export function AnalyzePage() {
               />
             </div>
           </div>
-
-          {/* Right Card - Analysis Section */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Safety Rating</h3>
-                <div className="h-4 bg-emerald-200 rounded-full">
-                  <div className="h-4 bg-emerald-600 rounded-full w-3/4"></div>
-                </div>
-                <p className="text-emerald-700 mt-2">75% Safe for Consumption</p>
-              </div>
+  <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
+  <div className="space-y-6">
+    <div className="bg-gray-50 p-4 rounded-lg">
+      <h3 className="text-lg font-medium mb-2">Safety Rating</h3>
+      <div className="h-4 bg-emerald-200 rounded-full">
+        <div className="h-4 bg-emerald-600 rounded-full w-0"></div>
+      </div>
+      <p className="text-emerald-700 mt-2">{selectedFile ? 'Processing...' : 'Upload to check Rating'}</p>
+    </div>
 
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Recommended Amount</h3>
-                <p className="text-gray-700">30g per serving</p>
-                <p className="text-sm text-gray-500 mt-1">Maximum 2 servings per day</p>
-              </div>
+    <div className="bg-gray-50 p-4 rounded-lg">
+      <h3 className="text-lg font-medium mb-2">Recommended Amount</h3>
+      <p className="text-gray-700">{selectedFile ? 'Processing...' : 'Upload to check Recommended Amount'}</p>
+      <p className="text-sm text-gray-500 mt-1">{selectedFile ? '' : ''}</p>
+    </div>
 
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium mb-2 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-amber-500" />
-                  Allergen Information
-                </h3>
-                <ul className="list-disc list-inside text-gray-700">
-                  <li>Contains Peanuts</li>
-                  <li>May contain traces of Milk</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+    <div className="bg-gray-50 p-4 rounded-lg">
+      <h3 className="text-lg font-medium mb-2 flex items-center gap-2">
+        <AlertTriangle className="w-5 h-5 text-amber-500" />
+        Allergen Information
+      </h3>
+      <ul className="list-disc list-inside text-gray-700">
+        {selectedFile ? <li>Processing...</li> : <li>Upload to check Allergen Info</li>}
+      </ul>
+    </div>
+  </div>
+</div>
+
         </div>
+        
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  {[
+    { activity: 'Walking', time: selectedFile ? '1h 16m' : 'NA', icon: '🚶‍♀️' },
+    { activity: 'Jogging', time: selectedFile ? '22 min' : 'NA', icon: '🏃‍♀️' },
+    { activity: 'Cycling', time: selectedFile ? '22 min' : 'NA', icon: '🚴‍♀️' },
+    { activity: 'Swimming', time: selectedFile ? '30 min' : 'NA', icon: '🏊‍♀️' },
+  ].map((exercise, index) => (
+    <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+      <div className="flex flex-col items-center text-center">
+        <span className="text-4xl mb-4">{exercise.icon}</span>
+        <h3 className="text-xl font-semibold text-emerald-800">{exercise.time}</h3>
+        <p className="text-gray-600">of {exercise.activity}</p>
+      </div>
+    </div>
+  ))}
+</div>
 
-        {/* Calorie Burn Cards */}
-        <h2 className="text-2xl font-bold text-emerald-800 mb-6">Calorie Burn Time</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { activity: 'Walking', time: '1h 16m', icon: '🚶‍♀️' },
-            { activity: 'Jogging', time: '22 min', icon: '🏃‍♀️' },
-            { activity: 'Cycling', time: '22 min', icon: '🚴‍♀️' },
-            { activity: 'Swimming', time: '30 min', icon: '🏊‍♀️' },
-          ].map((exercise, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-              <div className="flex flex-col items-center text-center">
-                <span className="text-4xl mb-4">{exercise.icon}</span>
-                <h3 className="text-xl font-semibold text-emerald-800">{exercise.time}</h3>
-                <p className="text-gray-600">of {exercise.activity}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

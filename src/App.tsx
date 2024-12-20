@@ -4,7 +4,6 @@ import axios, { AxiosError } from 'axios';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './components/HomePage';
 import { AnalyzePage } from './components/AnalyzePage';
-import { Chatbot } from './components/Chatbot';
 import Modal from './components/Modal';
 
 function App() {
@@ -57,8 +56,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
       <Navbar />
       {path === '/analyze' ? <AnalyzePage /> : <HomePage />}
-      {showModal && <Modal onSave={handleSaveData} />}
-      <Chatbot />
+      {showModal && <Modal onSave={handleSaveData} />}      
     </div>
     </header>
   );

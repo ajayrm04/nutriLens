@@ -2,6 +2,7 @@
 import { Github, Linkedin, Twitter } from 'lucide-react';
 import ajay from "./images/ajay.jpg";
 import morya from "./images/morya.jpg";
+import srikanth from "./images/srikanth.jpg";
 
 interface TeamMember {
   name: string;
@@ -49,7 +50,7 @@ const teamMembers: TeamMember[] = [
   {
     name: "Srikanth",
     role: "Backend Engineer",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop",
+    image: srikanth,
     bio: "Systems architect specializing in scalable infrastructure and machine learning implementations.",
     social: {
       github: "#",

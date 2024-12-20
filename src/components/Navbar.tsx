@@ -1,6 +1,8 @@
 import React from 'react';
 import { Menu } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { Chatbot } from './Chatbot';
+
 
 export function Navbar() {
   const scrollToAbout = (e: React.MouseEvent) => {
@@ -56,13 +58,15 @@ export function Navbar() {
               About Us
             </NavLink>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex sticky space-x-4">
             <SignedOut>
               <SignInButton mode="modal" />
             </SignedOut>
             <SignedIn>
               <UserButton />
             </SignedIn>
+            <Chatbot />
+            
 
             <div className="md:hidden">
               <button className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
