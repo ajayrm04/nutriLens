@@ -6,6 +6,7 @@ export function AnalyzePage() {
   const [servingSize, setServingSize] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
