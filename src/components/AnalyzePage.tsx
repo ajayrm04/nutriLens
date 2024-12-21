@@ -3,10 +3,11 @@ import { Camera, Upload, AlertTriangle } from 'lucide-react';
 import CropModal from '../components/CropModal';
 
 export function AnalyzePage() {
+  const [foodName, setFoodName] = useState('');
   const [servingSize, setServingSize] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
-  const [showCameraModal, setShowCameraModal] = useState(false);
+  //const [showCameraModal, setShowCameraModal] = useState(false);
   
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,8 +50,12 @@ export function AnalyzePage() {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        let context = canvas.getContext('2d');
+        if (context) {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        } else {
+          console.warn("Failed to get canvas context");
+        }
         canvas.toBlob((blob) => {
           if (blob) {
             const file = new File([blob], 'captured-image.png', { type: 'image/png' });
@@ -124,10 +129,19 @@ export function AnalyzePage() {
               </div>
             </div>
             
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Serving Size (grams)
-              </label>
+            <div className="mt-6 flex gap-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Food Name</label>
+              <input
+                type="text"
+                value={foodName}
+                onChange={(e) => setFoodName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Enter food name"
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Serving Size (grams)</label>
               <input
                 type="number"
                 value={servingSize}
@@ -136,6 +150,10 @@ export function AnalyzePage() {
                 placeholder="Enter serving size"
               />
             </div>
+          </div>
+            <button className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-all shadow-lg">
+            Process
+          </button>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6">
   <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
