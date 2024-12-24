@@ -43,7 +43,7 @@ const userProfileSchema = new mongoose.Schema({
 
 const UserProfile = mongoose.model('UserProfile', userProfileSchema);
 
-app.post('/api/save-user-data', async (req, res) => {
+app.post('/api/save-user-data/', async (req, res) => {
   try {
     const { clerkId, age, gender, specialNeeds, weight, height } = req.body;
 
@@ -57,7 +57,7 @@ app.post('/api/save-user-data', async (req, res) => {
 
     const existingProfile = await UserProfile.findOne({ clerkId });
     if (existingProfile) {
-      return res.status(409).json({ message: 'Profile already exists' }); // Changed to 409 Conflict
+      return res.status(409).json({ message: 'Profile already exists' });
     }
 
     const newProfile = new UserProfile({
@@ -88,7 +88,6 @@ app.get('/api/check-user-data/:userId', async (req, res) => {
   }
 });
 
-// Default route
 app.get('/', (req, res) => {
   res.send('Welcome to the NutriLens API!');
 });
