@@ -7,34 +7,45 @@ import { AnalyzePage } from './components/AnalyzePage';
 import Modal from './components/Modal';
 
 function App() {
-  const { user } = useUser(); // Fetch logged-in user details
+  const { user } = useUser();
   const [showModal, setShowModal] = useState(false);
   const path = window.location.pathname;
 
   useEffect(() => {
     if (user) {
-      console.log('User ID:', user.id); // Debug: Log user ID
-      axios
-        .get(`http://localhost:5000/api/user-data/${user.id}`) // Check if user exists
-        .then((response) => {
+      console.log('User ID:', user.id);
+      
+      axios.get(`http://localhost:5000/api/check-user-data/${user.id}`)
+        .then(response => {
           if (!response.data.exists) {
-            setShowModal(true); // Show modal for new users
+            setShowModal(true);
+          } else {
+            console.log('User data fetched successfully');
           }
         })
-        .catch((error) => {
-          console.error('Error checking user data:', error);
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+          setShowModal(true);
         });
+    } else {
+      setShowModal(false);
     }
   }, [user]);
 
   const handleSaveData = async (formData: Record<string, unknown>) => {
     if (user) {
       try {
-        const response = await axios.post('http://localhost:5000/api/user-data/${user.id}', {
-          clerkId: user.id,
+        const numericData = {
           ...formData,
+          age: Number(formData.age), // Convert to number
+          weight: Number(formData.weight), // Convert to number
+          height: Number(formData.height), // Convert to number
+        };
+        const response = await axios.post(`http://localhost:5000/api/user-data`, {
+          clerkId: user.id,
+          ...numericData,
         });
-        console.log('Save Response:', response.data); // Debug: Log save response
+        console.log('Save Response:', response.data);
         setShowModal(false);
         alert('Data saved successfully!');
       } catch (error) {

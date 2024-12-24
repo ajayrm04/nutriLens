@@ -7,7 +7,7 @@ interface OnSaveProps {
     specialNeeds: string[];
     weight: string;
     height: string;
-  }): void;
+  }): Promise<void>;
 }
 
 export default function Modal({ onSave }: { onSave: OnSaveProps }) {
@@ -16,10 +16,28 @@ export default function Modal({ onSave }: { onSave: OnSaveProps }) {
   const [specialNeeds, setSpecialNeeds] = useState<string[]>([]);
   const [weight, setWeight] = useState<string>('');
   const [height, setHeight] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSave({ age, gender, specialNeeds, weight, height });
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await onSave({ age, gender, specialNeeds, weight, height });
+      // Clear form after successful submission
+      setAge('');
+      setGender('');
+      setSpecialNeeds([]);
+      setWeight('');
+      setHeight('');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setError('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSpecialNeedsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +69,7 @@ export default function Modal({ onSave }: { onSave: OnSaveProps }) {
 
       <div className="relative bg-white p-6 rounded-lg shadow-lg z-10 max-w-md w-full">
         <h2 className="text-xl font-bold mb-4">Enter Your Details</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="number"
@@ -110,9 +129,12 @@ export default function Modal({ onSave }: { onSave: OnSaveProps }) {
 
           <button
             type="submit"
-            className="w-full bg-emerald-500 text-white p-2 rounded hover:bg-emerald-600"
+            className={`w-full bg-emerald-500 text-white p-2 rounded hover:bg-emerald-600 ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isSubmitting}
           >
-            Save
+            {isSubmitting ? 'Saving...' : 'Save'}
           </button>
         </form>
       </div>
