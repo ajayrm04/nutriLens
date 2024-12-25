@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.20.2",
     "@clerk/nextjs": "^6.9.2",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

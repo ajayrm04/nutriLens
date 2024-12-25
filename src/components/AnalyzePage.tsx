@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Camera, Upload, AlertTriangle } from 'lucide-react';
 import CropModal from '../components/CropModal';
+import { CameraModal } from './CameraModal';
 
 export function AnalyzePage() {
   const [foodName, setFoodName] = useState('');
   const [servingSize, setServingSize] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
-  //const [showCameraModal, setShowCameraModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,52 +37,12 @@ export function AnalyzePage() {
     alert('Image cropped and saved successfully!');
   };
 
-  const handleCameraClick = async () => {
-    try {
-      const constraints = {
-        video: { facingMode: 'environment' },
-        audio: false,
-      };  
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.play();  
-      const captureImage = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        let context = canvas.getContext('2d');
-        if (context) {
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        } else {
-          console.warn("Failed to get canvas context");
-        }
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const file = new File([blob], 'captured-image.png', { type: 'image/png' });
-            setSelectedFile(file);
-            setShowCropModal(true);
-          }
-        }, 'image/png');
-        stream.getTracks().forEach(track => track.stop());
-      };
-      const captureButton = document.createElement('button');
-      captureButton.textContent = 'Capture Image';
-      captureButton.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; background-color: #10b981; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;';
-      document.body.appendChild(video);
-      document.body.appendChild(captureButton);
-  
-      captureButton.addEventListener('click', () => {
-        captureImage();
-        document.body.removeChild(video);
-        document.body.removeChild(captureButton);
-      });
-    } catch (error) {
-      console.error('Error accessing the camera:', error);
-      alert('Camera access is not available.');
-    }
+  const handleCaptureImage = (blob: Blob) => {
+    const file = new File([blob], 'captured-image.png', { type: 'image/png' });
+    setSelectedFile(file);
+    setShowCropModal(true);
+    setShowCameraModal(false);
   };
-  
   
 
   return (
@@ -112,19 +73,26 @@ export function AnalyzePage() {
                     Upload File
                   </label>
                   <button 
-                    onClick={handleCameraClick}
-                    className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition flex items-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    Use Camera
-                  </button>
-                  {showCropModal && selectedFile && (
-                    <CropModal
-                    imageFile={selectedFile}
-                    onClose={() => setShowCropModal(false)}
-                    onSave={handleSaveCroppedImage}
-                    />
-                  )}
+        onClick={() => setShowCameraModal(true)}
+        className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition flex items-center gap-2"
+      >
+        <Camera className="w-4 h-4" />
+        Use Camera
+      </button>
+
+      {showCropModal && selectedFile && (
+        <CropModal
+          imageFile={selectedFile}
+          onClose={() => setShowCropModal(false)}
+          onSave={handleSaveCroppedImage}
+        />
+      )}
+
+      <CameraModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={handleCaptureImage}
+      />
                 </div>
               </div>
             </div>
