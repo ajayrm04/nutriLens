@@ -58,6 +58,7 @@ export function CameraModal({ isOpen, onClose, onCapture }: CameraModalProps) {
       }
     }
   };
+  
 
   useEffect(() => {
     if (stream && videoRef.current) {

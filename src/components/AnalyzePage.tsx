@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Camera, Upload, AlertTriangle } from 'lucide-react';
 import CropModal from '../components/CropModal';
 import { CameraModal } from './CameraModal';
+import { Blob } from 'buffer';
 
 export function AnalyzePage() {
   const [foodName, setFoodName] = useState('');
