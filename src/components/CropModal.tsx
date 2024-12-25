@@ -9,7 +9,14 @@ interface CropModalProps {
 }
 
 const CropModal: React.FC<CropModalProps> = ({ imageFile, onClose, onSave }) => {
-  const [crop, setCrop] = useState<Crop>({ aspect: 16 / 9 });
+  const [crop, setCrop] = useState<Crop>({
+    unit: `%`,
+    width: 50,
+    height: 50,
+    x: 10,
+    y: 10,
+  });
+  
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -24,29 +31,41 @@ const CropModal: React.FC<CropModalProps> = ({ imageFile, onClose, onSave }) => 
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     setCrop({
-      unit: "%",
-      width: 80,
-      height: (80 * height) / width,
+      unit: `%`,
+      width: 50,
+      height: (50 * (height || 100)) / (width || 100), 
+      x: 10,
+      y: 10,
     });
   };
+  
 
-  // Generate the cropped image
   const generateCroppedImage = () => {
-    if (!completedCrop || !imageRef.current || !previewCanvasRef.current) return;
-
+    if (!completedCrop || !imageRef.current || !previewCanvasRef.current) {
+      console.error("Incomplete crop or missing references.");
+      return;
+    }
+  
     const image = imageRef.current;
     const canvas = previewCanvasRef.current;
     const ctx = canvas.getContext('2d');
-
-    if (!ctx) return;
-
+  
+    if (!ctx || !completedCrop.width || !completedCrop.height) {
+      console.error("Canvas context is missing or crop dimensions are undefined.");
+      return;
+    }
+  
     const { width, height, x, y } = completedCrop;
-
-    canvas.width = width!;
-    canvas.height = height!;
-
-    ctx.drawImage(image, x!, y!, width!, height!, 0, 0, width!, height!);
-
+  
+    canvas.width = width;
+    canvas.height = height;
+  
+    ctx.drawImage(
+      image,
+      x, y, width, height,
+      0, 0, width, height
+    );
+  
     canvas.toBlob((blob) => {
       if (blob) {
         const file = new File([blob], 'image.png', { type: 'image/png' });
@@ -54,6 +73,7 @@ const CropModal: React.FC<CropModalProps> = ({ imageFile, onClose, onSave }) => 
       }
     }, 'image/png');
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
@@ -68,8 +88,9 @@ const CropModal: React.FC<CropModalProps> = ({ imageFile, onClose, onSave }) => 
             <ReactCrop
               crop={crop}
               onChange={(newCrop) => setCrop(newCrop)}
-              onComplete={(c) => setCompletedCrop(c)}
-              aspect={16 / 9}
+              onComplete={(c) => {
+                console.log("Completed crop:", c);
+                setCompletedCrop(c)} }
               className="max-w-full"
             >
               <img

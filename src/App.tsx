@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import {useUser } from '@clerk/clerk-react';
-import axios, { AxiosError } from 'axios';
+import { useUser } from '@clerk/clerk-react';
+import axios from 'axios';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './components/HomePage';
 import { AnalyzePage } from './components/AnalyzePage';
@@ -13,52 +13,57 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      axios.get(`http://localhost:5000/api/save-user-data/${user.id}`)
+      console.log('User ID:', user.id);
+      
+      axios.get(`http://localhost:5000/api/check-user-data/${user.id}`)
         .then(response => {
           if (!response.data.exists) {
             setShowModal(true);
+          } else {
+            console.log('User data fetched successfully');
           }
         })
-        .catch(error => console.error('Error checking user data:', error));
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+          setShowModal(true);
+        });
+    } else {
+      setShowModal(false);
     }
   }, [user]);
 
   const handleSaveData = async (formData: Record<string, unknown>) => {
     if (user) {
       try {
-        const response = await axios.post('http://localhost:5000/api/save-user-data', {
-          clerkId: user.id,
+        const numericData = {
           ...formData,
+          age: Number(formData.age), // Convert to number
+          weight: Number(formData.weight), // Convert to number
+          height: Number(formData.height), // Convert to number
+        };
+        const response = await axios.post(`http://localhost:5000/api/user-data`, {
+          clerkId: user.id,
+          ...numericData,
         });
-        console.log(response.data);
+        console.log('Save Response:', response.data);
         setShowModal(false);
         alert('Data saved successfully!');
-      } catch(error: unknown) {
-        if (error instanceof AxiosError && error.response) {
-          console.error('Error saving data:', error.response.data);
-          alert(`Failed to save data. Status code: ${error.response.status}`);
-        } else if (error instanceof Error) {
-          console.error('Error saving data:', error.message);
-          alert('Failed to save data. Check your network connection.');
-        } else {
-          console.error('Error saving data:', String(error));
-          alert('Failed to save data. An unknown error occurred.');
-        }
+      } catch (error) {
+        console.error('Error saving data:', error);
+        alert('Failed to save data. Please try again.');
       }
-  } else {
-    console.warn("User is not authenticated");
-    alert("User is not authenticated");
-  }
+    } else {
+      console.warn('User is not authenticated');
+      alert('User is not authenticated.');
+    }
   };
 
   return (
-    <header>
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
       <Navbar />
       {path === '/analyze' ? <AnalyzePage /> : <HomePage />}
-      {showModal && <Modal onSave={handleSaveData} />}      
+      {showModal && <Modal onSave={handleSaveData} />} {/* Show modal */}
     </div>
-    </header>
   );
 }
 

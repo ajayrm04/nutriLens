@@ -390,7 +390,6 @@ pd.DataFrame(out_array).to_csv('Final_Table.csv')
 import re
 from rapidfuzz import process, fuzz
 
-# Updated list of known nutrients
 KNOWN_NUTRIENTS = [
     "ENERGY",
     "PROTEINS",
